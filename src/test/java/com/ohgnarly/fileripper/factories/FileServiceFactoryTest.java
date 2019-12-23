@@ -7,7 +7,6 @@ import com.ohgnarly.fileripper.services.XmlFileService;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.ohgnarly.fileripper.factories.FileServiceFactory.*;
 import static com.ohgnarly.fileripper.integration.utilities.DataUtility.*;
 import static org.junit.Assert.assertTrue;
 
@@ -16,7 +15,7 @@ public class FileServiceFactoryTest {
 
     @Before
     public void setUp() {
-        fileServiceFactory = new FileServiceFactory();
+        fileServiceFactory = new FileServiceFactoryImpl();
     }
 
     @Test
