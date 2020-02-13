@@ -3,7 +3,6 @@ package com.ohgnarly.fileripper.services
 import com.ohgnarly.fileripper.exceptions.FileRipperException
 import com.ohgnarly.fileripper.models.FileDefinition
 import com.ohgnarly.fileripper.models.FileOutput
-
 import java.io.File
 
 abstract class FileService internal constructor(internal var fileDefinition: FileDefinition) {

@@ -1,58 +1,58 @@
 package com.ohgnarly.fileripper.integration;
 
-import com.ohgnarly.fileripper.controllers.FileRipperController;
+import com.ohgnarly.fileripper.FileRipper;
+import com.ohgnarly.fileripper.models.FileDefinition;
 import com.ohgnarly.fileripper.models.FileOutput;
-import com.ohgnarly.fileripper.models.FileRipperRequest;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.springframework.http.ResponseEntity;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import static com.ohgnarly.fileripper.integration.utilities.DataUtility.*;
+import static com.ohgnarly.fileripper.testhelpers.FileBuildersKt.*;
+import static com.ohgnarly.fileripper.testhelpers.FileDefinitionBuildersKt.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 
 public class FileRipperStepDefs {
-    private FileRipperRequest fileRipperRequest;
-    private FileRipperController fileRipperController;
-    private ResponseEntity<FileOutput> responseEntity;
+    private FileOutput fileOutput;
+    private FileRipper fileRipper;
+    private FileDefinition fileDefinition;
+    private File file;
 
     @Before
     public void setUp() {
-        fileRipperController = new FileRipperController();
-        fileRipperRequest = new FileRipperRequest();
+        fileRipper = new FileRipper();
     }
 
     @Given("a file whose fields are separated by a {string}")
-    public void aFileWhoseFieldsAreSeparatedByADelimiter(String delimiter) throws Throwable {
-        fileRipperRequest.setMultipartFile(createDelimitedMultipartFile(delimiter, false));
-        fileRipperRequest.setFileDefinition(createDelimitedFileDefinition(delimiter));
+    public void aFileWhoseFieldsAreSeparatedByADelimiter(String delimiter) {
+        file = buildDelimitedFile(delimiter, false);
+        fileDefinition = buildDelimitedFileDefinition(delimiter);
     }
 
     @Given("a file whose fields are of fixed width")
-    public void aFileWhoseFieldsAreOfFixedWidth() throws Throwable {
-        fileRipperRequest.setMultipartFile(createFixedMultipartFile(true));
-        fileRipperRequest.setFileDefinition(createFixedFileDefinition());
+    public void aFileWhoseFieldsAreOfFixedWidth() {
+        file = buildFixedFile(true);
+        fileDefinition = buildFixedFileDefinition();
     }
 
     @Given("a file in xml format")
     public void aFileInXmlFormat() throws Throwable {
-        fileRipperRequest.setMultipartFile(createXmlMultipartFile());
-        fileRipperRequest.setFileDefinition(createXmlFileDefinition());
+        file = buildXmlFile();
+        fileDefinition = buildXmlFileDefinition();
     }
 
     @When("the file is ripped")
-    public void theFileIsRipped() throws Throwable {
-        responseEntity = fileRipperController.getFileOutput(fileRipperRequest);
+    public void theFileIsRipped() {
+        fileOutput = fileRipper.ripFile(file, fileDefinition);
     }
 
     @Then("the file data is returned as json")
     public void theFileDataIsReturnedAsJson() {
-        FileOutput fileOutput = responseEntity.getBody();
         assertNotNull(fileOutput);
         assertTrue(isNotBlank(fileOutput.getFileName()));
         assertEquals(4, fileOutput.getRecords().size());

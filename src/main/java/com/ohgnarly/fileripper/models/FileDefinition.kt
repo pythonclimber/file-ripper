@@ -7,6 +7,6 @@ class FileDefinition {
     var fileType: FileType? = null
     var hasHeader: Boolean = false
     var delimiter: String = ""
-    var fieldDefinitions: List<FieldDefinition> = mutableListOf()
+    var fieldDefinitions: MutableList<FieldDefinition> = mutableListOf()
     var recordXmlElement: String? = ""
 }

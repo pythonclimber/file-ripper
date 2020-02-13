@@ -7,27 +7,18 @@ import com.ohgnarly.fileripper.models.FileDefinition
 import com.ohgnarly.fileripper.models.FileOutput
 import org.apache.commons.lang3.StringUtils.split
 import java.io.File
-import java.io.IOException
 import java.lang.String.format
 import java.nio.file.Files.readAllLines
 import java.util.*
 
 class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefinition) {
-
-    @Throws(FileRipperException::class)
     override fun processFile(file: File): FileOutput {
-        try {
-            val fileOutput = FileOutput()
-            fileOutput.fileName = file.name
-            fileOutput.records = processLines(readAllLines(file.toPath()))
-            return fileOutput
-        } catch (ex: IOException) {
-            throw FileRipperException("Error reading provided file", ex)
-        }
-
+        val fileOutput = FileOutput()
+        fileOutput.fileName = file.name
+        fileOutput.records = processLines(readAllLines(file.toPath()))
+        return fileOutput
     }
 
-    @Throws(FileRipperException::class)
     private fun processLines(lines: MutableList<String>): List<Map<String, Any>> {
         val records = ArrayList<Map<String, Any>>()
         if (fileDefinition.hasHeader) { //if list has header, remove first line in list
@@ -44,7 +35,6 @@ class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefiniti
         return records
     }
 
-    @Throws(FileRipperException::class)
     private fun processDelimitedLine(line: String): Map<String, Any> {
         val fields = split(line, fileDefinition.delimiter)
         if (fields.size < fileDefinition.fieldDefinitions.size) {
@@ -62,7 +52,6 @@ class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefiniti
         return record
     }
 
-    @Throws(FileRipperException::class)
     private fun processFixedLine(line: String): Map<String, Any> {
         val record = LinkedHashMap<String, Any>()
         for (fieldDefinition in fileDefinition.fieldDefinitions) {
