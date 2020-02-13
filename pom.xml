@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ohgnarly</groupId>
     <artifactId>file-ripper</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>file-ripper</name>
     <description>I rip files and sh*t!</description>
 

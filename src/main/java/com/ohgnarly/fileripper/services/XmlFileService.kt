@@ -10,7 +10,6 @@ import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 
 class XmlFileService(fileDefinition: FileDefinition) : FileService(fileDefinition) {
-
     override fun processFile(file: File): FileOutput {
         val fileOutput = FileOutput()
         fileOutput.fileName = file.name
