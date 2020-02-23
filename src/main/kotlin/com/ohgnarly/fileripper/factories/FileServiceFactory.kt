@@ -7,7 +7,7 @@ import com.ohgnarly.fileripper.services.FlatFileService
 import com.ohgnarly.fileripper.services.XmlFileService
 
 
-fun createFileService(fileDefinition: FileDefinition): FileService {
+internal fun createFileService(fileDefinition: FileDefinition): FileService {
     return when (fileDefinition.fileType) {
         FileType.DELIMITED, FileType.FIXED -> FlatFileService(fileDefinition)
         FileType.XML -> XmlFileService(fileDefinition)

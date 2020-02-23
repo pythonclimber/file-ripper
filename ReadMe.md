@@ -68,6 +68,7 @@ public class FileDefinitionBuilder {
 }
 ```
 
+
 ##Ripping Files
 
 Using create an instance of the FileRipper class to get started ripping your files.  Your file can be parsed into a FileOutput object which contains the data in a Map<String, String>.  This is perfect for turning your data into a json object for export to an API.
@@ -116,6 +117,7 @@ public class FileProcessor {
 }
 ```
 
+
 ##Finding and Ripping Files
 
 FileRipper also supports finding your files on the file system and ripping them for you.  This saves you the time of looking up your files first.
@@ -134,6 +136,7 @@ public class FileProcessor {
     }
 }
 ```
+
 
 ##Optional Functionality
 
@@ -166,6 +169,7 @@ public class FileProcessor {
     }
 }
 ```
+
 
 ###Moving Files to a completed directory
 
