@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ohgnarly</groupId>
     <artifactId>file-ripper</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>file-ripper</name>
     <description>I rip files and sh*t!</description>
 
@@ -41,6 +41,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
@@ -111,6 +116,7 @@
                         <configuration>
                             <sourceDirs>
                                 <sourceDir>src/main/java</sourceDir>
+                                <sourceDir>src/main/kotlin</sourceDir>
                             </sourceDirs>
                         </configuration>
                     </execution>
@@ -122,6 +128,7 @@
                         <configuration>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/src/test/java</sourceDir>
+                                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
                             </sourceDirs>
                         </configuration>
                     </execution>
@@ -164,8 +171,8 @@
                 <configuration>
                     <excludes>
                         <exclude>**/models/**/*.*</exclude>
-                        <exclude>**/enums/**/*.*</exclude>
                         <exclude>**/exceptions/**/*.*</exclude>
+                        <exclude>**/movers/**/*.*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -13,7 +13,7 @@ class XmlFileService(fileDefinition: FileDefinition) : FileService(fileDefinitio
     override fun processFile(file: File): FileOutput {
         val fileOutput = FileOutput()
         fileOutput.fileName = file.name
-        val records = ArrayList<Map<String, Any>>()
+        val records = ArrayList<Map<String, String>>()
 
         val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = documentBuilder.parse(file)
@@ -21,7 +21,7 @@ class XmlFileService(fileDefinition: FileDefinition) : FileService(fileDefinitio
         val nodes = root.getElementsByTagName(fileDefinition.recordXmlElement)
         for (i in 0 until nodes.length) {
             val person = nodes.item(i) as Element
-            val record = LinkedHashMap<String, Any>()
+            val record = LinkedHashMap<String, String>()
             for (fieldDefinition in fileDefinition.fieldDefinitions) {
                 val fieldNodes = person.getElementsByTagName(fieldDefinition.fieldName)
                 if (fieldNodes.length == 0) {

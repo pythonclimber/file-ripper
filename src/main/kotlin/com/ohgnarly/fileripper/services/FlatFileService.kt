@@ -1,10 +1,10 @@
 package com.ohgnarly.fileripper.services
 
-import com.ohgnarly.fileripper.enums.FileType.DELIMITED
-import com.ohgnarly.fileripper.enums.FileType.FIXED
 import com.ohgnarly.fileripper.exceptions.FileRipperException
 import com.ohgnarly.fileripper.models.FileDefinition
 import com.ohgnarly.fileripper.models.FileOutput
+import com.ohgnarly.fileripper.models.FileType.DELIMITED
+import com.ohgnarly.fileripper.models.FileType.FIXED
 import org.apache.commons.lang3.StringUtils.split
 import java.io.File
 import java.lang.String.format
@@ -19,8 +19,8 @@ class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefiniti
         return fileOutput
     }
 
-    private fun processLines(lines: MutableList<String>): List<Map<String, Any>> {
-        val records = ArrayList<Map<String, Any>>()
+    private fun processLines(lines: MutableList<String>): List<Map<String, String>> {
+        val records = ArrayList<Map<String, String>>()
         if (fileDefinition.hasHeader) { //if list has header, remove first line in list
             lines.removeAt(0)
         }
@@ -35,13 +35,13 @@ class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefiniti
         return records
     }
 
-    private fun processDelimitedLine(line: String): Map<String, Any> {
+    private fun processDelimitedLine(line: String): Map<String, String> {
         val fields = split(line, fileDefinition.delimiter)
         if (fields.size < fileDefinition.fieldDefinitions.size) {
             throw FileRipperException(format("Record '%s' has invalid number of fields", line))
         }
 
-        val record = LinkedHashMap<String, Any>()
+        val record = LinkedHashMap<String, String>()
         for (i in fields.indices) {
             val fieldName = fileDefinition.fieldDefinitions[i].fieldName
             val fieldValue = fields[i]
@@ -52,8 +52,8 @@ class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefiniti
         return record
     }
 
-    private fun processFixedLine(line: String): Map<String, Any> {
-        val record = LinkedHashMap<String, Any>()
+    private fun processFixedLine(line: String): Map<String, String> {
+        val record = LinkedHashMap<String, String>()
         for (fieldDefinition in fileDefinition.fieldDefinitions) {
             val startPosition = fieldDefinition.startPosition!!
             val endPosition = fieldDefinition.startPosition!! + fieldDefinition.fieldLength!!

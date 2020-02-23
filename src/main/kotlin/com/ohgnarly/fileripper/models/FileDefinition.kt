@@ -1,6 +1,11 @@
 package com.ohgnarly.fileripper.models
 
-import com.ohgnarly.fileripper.enums.FileType
+
+enum class FileType {
+    DELIMITED,
+    FIXED,
+    XML
+}
 
 class FileDefinition {
     var fileMask: String = ""
@@ -8,5 +13,7 @@ class FileDefinition {
     var hasHeader: Boolean = false
     var delimiter: String = ""
     var fieldDefinitions: MutableList<FieldDefinition> = mutableListOf()
-    var recordXmlElement: String? = ""
+    var recordXmlElement: String = ""
+    var inputDirectory: String = ""
+    var completedDirectory: String = ""
 }

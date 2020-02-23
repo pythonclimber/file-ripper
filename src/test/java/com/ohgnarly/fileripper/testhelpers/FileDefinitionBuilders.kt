@@ -1,8 +1,8 @@
 package com.ohgnarly.fileripper.testhelpers
 
-import com.ohgnarly.fileripper.enums.FileType
 import com.ohgnarly.fileripper.models.FieldDefinition
 import com.ohgnarly.fileripper.models.FileDefinition
+import com.ohgnarly.fileripper.models.FileType
 
 fun buildDelimitedFileDefinition(delimiter: String): FileDefinition {
     val fieldDefinitions = mutableListOf<FieldDefinition>()
@@ -16,6 +16,7 @@ fun buildDelimitedFileDefinition(delimiter: String): FileDefinition {
     fileDefinition.delimiter = delimiter
     fileDefinition.hasHeader = false
     fileDefinition.fieldDefinitions = fieldDefinitions
+    fileDefinition.inputDirectory = "/path"
 
     return fileDefinition
 }
@@ -32,6 +33,7 @@ fun buildXmlFileDefinition(): FileDefinition {
     fileDefinition.hasHeader = false
     fileDefinition.recordXmlElement = "Person"
     fileDefinition.fieldDefinitions = fieldDefinitions
+    fileDefinition.inputDirectory = "/path"
 
     return fileDefinition
 }
@@ -47,6 +49,7 @@ fun buildFixedFileDefinition(): FileDefinition {
     fileDefinition.fileType = FileType.FIXED
     fileDefinition.hasHeader = true
     fileDefinition.fieldDefinitions = fieldDefinitions
+    fileDefinition.inputDirectory = "/path"
 
     return fileDefinition
 }
