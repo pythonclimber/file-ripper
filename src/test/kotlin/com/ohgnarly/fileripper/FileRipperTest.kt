@@ -1,29 +1,20 @@
 package com.ohgnarly.fileripper
 
-import com.nhaarman.mockito_kotlin.*
-import com.ohgnarly.fileripper.exceptions.FileRipperException
-import com.ohgnarly.fileripper.models.FileDefinition
-import com.ohgnarly.fileripper.models.FileOutput
-import com.ohgnarly.fileripper.repositories.FileRepository
-import com.ohgnarly.fileripper.movers.FileMover
-import com.ohgnarly.fileripper.services.FileService
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.apache.commons.lang3.StringUtils.join
 import org.junit.Assert.assertEquals
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.ExpectedException
 import java.nio.file.Files
+import kotlin.test.assertFailsWith
 
 class FileRipperTest {
-    private val fileServiceFactory = {_: FileDefinition -> mockFileService}
-    private val mockFileService = mock<FileService>()
-    private val mockFileRepository = mock<FileRepository>()
-    private val mockFileMover = mock<FileMover>()
+    private val fileServiceFactory = { _: FileDefinition -> mockFileService }
+    private val mockFileService = mockk<FileService>()
+    private val mockFileRepository = mockk<FileRepository>()
+    private val mockFileMover = mockk<FileMover>(relaxed = true)
     private val fileRipper = FileRipper(mockFileRepository, fileServiceFactory, mockFileMover)
-
-    @Rule
-    @JvmField
-    var expectedException: ExpectedException = ExpectedException.none()
 
     @Test
     fun testRipFile_GivenFileAndFileDefinition_ReturnsFileOutput() {
@@ -32,7 +23,9 @@ class FileRipperTest {
         val expectedOutput = FileOutput()
         val fileDefinition = FileDefinition()
 
-        whenever(mockFileService.processFile(file)).thenReturn(expectedOutput)
+        every {
+            mockFileService.processFile(file)
+        } returns expectedOutput
 
         //act
         val fileOutput = fileRipper.ripFile(file, fileDefinition)
@@ -47,13 +40,13 @@ class FileRipperTest {
         val file = Files.createTempFile("temp", ".temp").toFile()
         val fileDefinition = FileDefinition()
 
-        whenever(mockFileService.processFile(file)).thenThrow(FileRipperException("Yay!"))
-
-        expectedException.expect(FileRipperException::class.java)
-        expectedException.expectMessage("Yay!")
+        every { mockFileService.processFile(file) } throws FileRipperException("Yay!")
 
         //act
-        fileRipper.ripFile(file, fileDefinition)
+        val exception = assertFailsWith<FileRipperException> {fileRipper.ripFile(file, fileDefinition)}
+
+        //arrange
+        assertEquals("Yay!", exception.message)
     }
 
     @Test
@@ -70,9 +63,9 @@ class FileRipperTest {
         fileOutput.fileName = "Hello.txt"
         fileOutput.records = mutableListOf(fieldMap)
 
-        whenever(mockFileService.processFile(file)).thenReturn(fileOutput)
+        every { mockFileService.processFile(file) } returns fileOutput
 
-        val builder = {fields: Map<String, Any> -> join(fields.values, " ") }
+        val builder = { fields: Map<String, Any> -> join(fields.values, " ") }
 
         //act
         val fileResult = fileRipper.ripFile(file, fileDefinition, builder)
@@ -88,9 +81,11 @@ class FileRipperTest {
         //arrange
         val file = Files.createTempFile("temp", ".temp").toFile()
         val expectedOutput = FileOutput()
-        val fileDefinition = FileDefinition()
+        val fileDefinition = FileDefinition().apply {
+            completedDirectory = "/completed/"
+        }
 
-        whenever(mockFileService.processFile(file)).thenReturn(expectedOutput)
+        every { mockFileService.processFile(file) } returns expectedOutput
 
         //act
         val fileOutputs = fileRipper.ripFiles(mutableListOf(file), fileDefinition)
@@ -98,13 +93,16 @@ class FileRipperTest {
         //assert
         assertEquals(1, fileOutputs.size)
         assertEquals(expectedOutput, fileOutputs[0])
+        verify(exactly = 1) { mockFileMover.moveFiles(any(), any()) }
     }
 
     @Test
     fun testRipFiles_GivenFileListAndFileDefinitionAndObjectBuilder_ReturnsFileResult() {
         //arrange
         val file = createTempFile("temp", ".temp")
-        val fileDefinition = FileDefinition()
+        val fileDefinition = FileDefinition().apply {
+            completedDirectory = "/completed/"
+        }
 
         val fieldMap = mutableMapOf<String, String>()
         fieldMap["1"] = "Aaron"
@@ -114,9 +112,9 @@ class FileRipperTest {
         fileOutput.fileName = "Hello.txt"
         fileOutput.records = mutableListOf(fieldMap)
 
-        whenever(mockFileService.processFile(file)).thenReturn(fileOutput)
+        every { mockFileService.processFile(file) } returns fileOutput
 
-        val builder = {fields: Map<String, Any> -> join(fields.values, " ") }
+        val builder = { fields: Map<String, Any> -> join(fields.values, " ") }
 
         //act
         val fileResults = fileRipper.ripFiles(mutableListOf(file), fileDefinition, builder)
@@ -126,6 +124,7 @@ class FileRipperTest {
         assertEquals("Hello.txt", fileResults[0].fileName)
         assertEquals(1, fileResults[0].records.size)
         assertEquals("Aaron Smith", fileResults[0].records[0])
+        verify(exactly = 1) { mockFileMover.moveFiles(any(), any()) }
     }
 
     @Test
@@ -135,8 +134,8 @@ class FileRipperTest {
         val expectedOutput = FileOutput()
         val fileDefinition = FileDefinition()
 
-        whenever(mockFileRepository.getFiles(any(), any())).thenReturn(mutableListOf(file))
-        whenever(mockFileService.processFile(file)).thenReturn(expectedOutput)
+        every { mockFileRepository.getFiles(allAny(), allAny()) } returns mutableListOf(file)
+        every { mockFileService.processFile(file) } returns expectedOutput
 
         //act
         val fileOutputs = fileRipper.findAndRipFiles(fileDefinition)
@@ -144,7 +143,6 @@ class FileRipperTest {
         //assert
         assertEquals(1, fileOutputs.size)
         assertEquals(expectedOutput, fileOutputs[0])
-        verify(mockFileMover, times(1)).moveFiles(any(), any())
     }
 
     @Test
@@ -161,10 +159,10 @@ class FileRipperTest {
         fileOutput.fileName = "Hello.txt"
         fileOutput.records = mutableListOf(fieldMap)
 
-        whenever(mockFileRepository.getFiles(any(), any())).thenReturn(mutableListOf(file))
-        whenever(mockFileService.processFile(file)).thenReturn(fileOutput)
+        every { mockFileRepository.getFiles(allAny(), allAny()) } returns mutableListOf(file)
+        every { mockFileService.processFile(file) } returns fileOutput
 
-        val builder = {fields: Map<String, Any> -> join(fields.values, " ") }
+        val builder = { fields: Map<String, Any> -> join(fields.values, " ") }
 
         //act
         val fileResults = fileRipper.findAndRipFiles(fileDefinition, builder)
@@ -174,6 +172,5 @@ class FileRipperTest {
         assertEquals("Hello.txt", fileResults[0].fileName)
         assertEquals(1, fileResults[0].records.size)
         assertEquals("Aaron Smith", fileResults[0].records[0])
-        verify(mockFileMover, times(1)).moveFiles(any(), any())
     }
 }

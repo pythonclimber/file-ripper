@@ -1,4 +1,4 @@
-package com.ohgnarly.fileripper.repositories
+package com.ohgnarly.fileripper
 
 import org.apache.commons.io.filefilter.WildcardFileFilter
 import java.io.File

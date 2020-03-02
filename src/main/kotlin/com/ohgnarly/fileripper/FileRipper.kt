@@ -1,30 +1,31 @@
 package com.ohgnarly.fileripper
 
-import com.ohgnarly.fileripper.factories.createFileService
-import com.ohgnarly.fileripper.models.FileDefinition
-import com.ohgnarly.fileripper.models.FileOutput
-import com.ohgnarly.fileripper.models.FileResult
-import com.ohgnarly.fileripper.repositories.FileRepository
-import com.ohgnarly.fileripper.repositories.WildcardFileRepository
-import com.ohgnarly.fileripper.movers.DefaultFileMover
-import com.ohgnarly.fileripper.movers.FileMover
-import com.ohgnarly.fileripper.services.FileService
+import org.apache.commons.lang3.StringUtils.isNotBlank
 import org.springframework.stereotype.Component
 import java.io.File
 import java.util.stream.Collectors.toList
 
 @Component
-class FileRipper(private val fileRepository: FileRepository, private val fileMover: FileMover) {
-    private var serviceFactory: (FileDefinition) -> FileService = ::createFileService
+class FileRipper(private val fileRepository: FileRepository, private val fileMover: FileMover,
+                 private val dataExporter: DataExporter) {
+    private var serviceFactory: (FileDefinition) -> FileService = (FileService)::create
 
-    constructor() : this(WildcardFileRepository(), DefaultFileMover())
+    constructor() : this(WildcardFileRepository(), DefaultFileMover(), DefaultDataExporter())
 
-    constructor(fileRepository: FileRepository) : this(fileRepository, DefaultFileMover())
+    constructor(fileRepository: FileRepository) : this(fileRepository, DefaultFileMover(), DefaultDataExporter())
 
-    constructor(fileMover: FileMover) : this(WildcardFileRepository(), fileMover)
+    constructor(fileMover: FileMover) : this(WildcardFileRepository(), fileMover, DefaultDataExporter())
+
+    constructor(dataExporter: DataExporter) : this(WildcardFileRepository(), DefaultFileMover(), dataExporter)
+
+    constructor(fileRepository: FileRepository, fileMover: FileMover) : this(fileRepository, fileMover, DefaultDataExporter())
+
+    constructor(fileRepository: FileRepository, dataExporter: DataExporter) : this(fileRepository, DefaultFileMover(), dataExporter)
+
+    constructor(fileMover: FileMover, dataExporter: DataExporter) : this(WildcardFileRepository(), fileMover, dataExporter)
 
     internal constructor(fileRepository: FileRepository, serviceFactory: (FileDefinition) -> FileService,
-                         fileMover: FileMover) : this(fileRepository, fileMover) {
+                         fileMover: FileMover) : this(fileRepository, fileMover, DefaultDataExporter()) {
         this.serviceFactory = serviceFactory
     }
 
@@ -47,32 +48,34 @@ class FileRipper(private val fileRepository: FileRepository, private val fileMov
     }
 
     fun ripFiles(files: List<File>, fileDefinition: FileDefinition): List<FileOutput> {
-        return files
-                .stream()
-                .map { f -> ripFile(f, fileDefinition) }
-                .collect(toList())
+        val outputList = files.map { f -> ripFile(f, fileDefinition) }
+
+        if (isNotBlank(fileDefinition.completedDirectory)) {
+            fileMover.moveFiles(files, fileDefinition.completedDirectory!!)
+        }
+
+        return outputList
     }
 
     fun <T> ripFiles(files: List<File>, fileDefinition: FileDefinition,
                      recordBuilder: (Map<String, String>) -> T): List<FileResult<T>> {
-        return files
-                .stream()
-                .map { f -> ripFile(f, fileDefinition, recordBuilder) }
-                .collect(toList())
+        val resultList = files.map { f -> ripFile(f, fileDefinition, recordBuilder) }
+
+        if (isNotBlank(fileDefinition.completedDirectory)) {
+            fileMover.moveFiles(files, fileDefinition.completedDirectory!!)
+        }
+
+        return resultList
     }
 
     fun findAndRipFiles(fileDefinition: FileDefinition): List<FileOutput> {
         val files = fileRepository.getFiles(fileDefinition.inputDirectory, fileDefinition.fileMask)
-        val outputs = ripFiles(files, fileDefinition)
-        fileMover.moveFiles(files, fileDefinition.completedDirectory)
-        return outputs
+        return ripFiles(files, fileDefinition)
     }
 
     fun <T> findAndRipFiles(fileDefinition: FileDefinition, recordBuilder: (Map<String, String>) -> T):
             List<FileResult<T>> {
         val files = fileRepository.getFiles(fileDefinition.inputDirectory, fileDefinition.fileMask)
-        val results = ripFiles(files, fileDefinition, recordBuilder)
-        fileMover.moveFiles(files, fileDefinition.completedDirectory)
-        return results
+        return ripFiles(files, fileDefinition, recordBuilder)
     }
 }
