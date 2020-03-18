@@ -8,7 +8,7 @@ import java.util.ArrayList
 import java.util.LinkedHashMap
 import javax.xml.parsers.DocumentBuilderFactory
 
-abstract class FileService protected constructor(internal var fileDefinition: FileDefinition) {
+abstract class FileService protected constructor(protected var fileDefinition: FileDefinition) {
     @Throws(FileRipperException::class)
     abstract fun processFile(file: File): FileOutput
 

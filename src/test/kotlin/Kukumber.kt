@@ -63,18 +63,18 @@ class FileRipperStepDefs {
 
     @When("the file is ripped as output")
     fun theFileIsRippedAsOutput() {
-        fileOutputList = fileRipper!!.findAndRipFiles(fileDefinition!!)
+        fileOutputList = fileRipper.findAndRipFiles(fileDefinition)
     }
 
     @When("the file is ripped as result")
     fun theFileIsRippedAsResult() {
-        fileResultList = fileRipper!!.findAndRipFiles(fileDefinition!!) { fields: Map<String, String> -> buildPerson(fields) }
+        fileResultList = fileRipper.findAndRipFiles(fileDefinition) { fields: Map<String, String> -> buildPerson(fields) }
     }
 
     @Then("the file data is returned as map")
     fun theFileDataIsReturnedAsMap() {
-        assertEquals(1, fileOutputList!!.size.toLong())
-        val fileOutput = fileOutputList!![0]
+        assertEquals(1, fileOutputList.size.toLong())
+        val fileOutput = fileOutputList[0]
         assertNotNull(fileOutput)
         assertTrue(StringUtils.isNotBlank(fileOutput.fileName))
         assertEquals(4, fileOutput.records.size.toLong())
@@ -83,8 +83,8 @@ class FileRipperStepDefs {
 
     @Then("the file data is returned as object")
     fun theFileDataIsReturnedAsObject() {
-        assertEquals(1, fileResultList!!.size.toLong())
-        val fileResult = fileResultList!![0]
+        assertEquals(1, fileResultList.size.toLong())
+        val fileResult = fileResultList[0]
         assertNotNull(fileResult)
         assertTrue(StringUtils.isNotBlank(fileResult.fileName))
         assertEquals(4, fileResult.records.size.toLong())

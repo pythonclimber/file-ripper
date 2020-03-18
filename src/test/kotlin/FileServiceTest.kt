@@ -1,16 +1,12 @@
 package com.ohgnarly.fileripper
 
 import org.junit.Assert
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
 import kotlin.test.assertEquals
 
 class FileServiceCompanionTest {
-    @Rule
-    @JvmField
-    var expectedException: ExpectedException = ExpectedException.none()
-
     @Test
     fun testCreateFileService_GivenDelimitedFileDefinition_ShouldReturnDelimitedFileService() {
         //arrange
@@ -52,16 +48,13 @@ class FileServiceCompanionTest {
         //arrange
         val fileDefinition = FileDefinition()
 
-        expectedException.expect(IllegalArgumentException::class.java)
-        expectedException.expectMessage("Invalid file type provided")
-
         //act
-        FileService.create(fileDefinition)
+        assertThrows<IllegalArgumentException> { FileService.create(fileDefinition) }
     }
 }
 
 class FlatFileServiceTest {
-    private var flatFileService: FlatFileService? = null
+    private lateinit var flatFileService: FlatFileService
 
     @Test
     fun testProcessFile_GivenDelimitedFile_ReturnsFileOutput() {
@@ -70,7 +63,7 @@ class FlatFileServiceTest {
         flatFileService = FlatFileService(buildDelimitedFileDefinition("|"))
 
         //act
-        val fileOutput = flatFileService!!.processFile(file)
+        val fileOutput = flatFileService.processFile(file)
 
         //assert
         assertEquals(file.name, fileOutput.fileName)
@@ -84,14 +77,14 @@ class FlatFileServiceTest {
         flatFileService = FlatFileService(buildFixedFileDefinition())
 
         //act
-        val fileOutput = flatFileService!!.processFile(file)
+        val fileOutput = flatFileService.processFile(file)
 
         //assert
         assertEquals(file.name, fileOutput.fileName)
         assertFileRecords(fileOutput.records)
     }
 
-    @Test(expected = FileRipperException::class)
+    @Test
     fun testProcessFile_GivenDelimitedFile_AndInvalidFileFormat_ThrowsFileRipperException() {
         //arrange
         val fileDefinition = buildDelimitedFileDefinition("|")
@@ -101,10 +94,10 @@ class FlatFileServiceTest {
         val file = buildDelimitedFile("|", false)
 
         //act
-        flatFileService!!.processFile(file)
+        assertThrows<FileRipperException> { flatFileService.processFile(file) }
     }
 
-    @Test(expected = FileRipperException::class)
+    @Test
     fun testProcessFile_GivenFixedFile_AndLastFieldTooLong_ThrowsFileRipperException() {
         //arrange
         val fileDefinition = buildFixedFileDefinition()
@@ -114,10 +107,10 @@ class FlatFileServiceTest {
         val file = buildFixedFile(true)
 
         //act
-        flatFileService!!.processFile(file)
+        assertThrows<FileRipperException> { flatFileService.processFile(file) }
     }
 
-    @Test(expected = FileRipperException::class)
+    @Test
     fun testProcessFile_GivenTooManyFields_ThrowsFileRipperException() {
         //arrange
         val fileDefinition = buildFixedFileDefinition()
@@ -127,12 +120,12 @@ class FlatFileServiceTest {
         val file = buildFixedFile(true)
 
         //act
-        flatFileService!!.processFile(file)
+        assertThrows<FileRipperException> { flatFileService.processFile(file) }
     }
 }
 
 class XmlFileServiceTest {
-    private var xmlFileService: XmlFileService? = null
+    private lateinit var xmlFileService: XmlFileService
 
     @Test
     fun testProcessFile_GivenValidXmlFile_ReturnsFileOutput() {
@@ -148,7 +141,7 @@ class XmlFileServiceTest {
         assertFileRecords(fileOutput.records)
     }
 
-    @Test(expected = FileRipperException::class)
+    @Test
     fun testProcessFile_GivenFieldNotInFile_ThrowsFileRipperException() {
         //arrange
         val file = buildXmlFile()
@@ -159,6 +152,6 @@ class XmlFileServiceTest {
         xmlFileService = XmlFileService(fileDefinition)
 
         //act
-        xmlFileService!!.processFile(file)
+        assertThrows<FileRipperException> { xmlFileService.processFile(file) }
     }
 }

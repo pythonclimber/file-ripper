@@ -1,11 +1,9 @@
 package com.ohgnarly.fileripper
 
 import org.apache.commons.lang3.StringUtils.isNotBlank
-import org.springframework.stereotype.Component
 import java.io.File
 import java.util.stream.Collectors.toList
 
-@Component
 class FileRipper(private val fileRepository: FileRepository, private val fileMover: FileMover,
                  private val dataExporter: DataExporter) {
     private var serviceFactory: (FileDefinition) -> FileService = (FileService)::create
@@ -78,4 +76,22 @@ class FileRipper(private val fileRepository: FileRepository, private val fileMov
         val files = fileRepository.getFiles(fileDefinition.inputDirectory, fileDefinition.fileMask)
         return ripFiles(files, fileDefinition, recordBuilder)
     }
+}
+
+class FileOutput {
+    var fileName: String = ""
+    var records: List<Map<String, String>> = mutableListOf()
+}
+
+class FileResult<T>(var fileName: String) {
+
+    var records: MutableList<T> = mutableListOf()
+}
+
+class FileRipperException : Exception {
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+
+    constructor(message: String, cause: Throwable) : super(message, cause) {}
 }

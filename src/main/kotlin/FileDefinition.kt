@@ -24,21 +24,3 @@ class FieldDefinition {
     var startPosition: Int? = null
     var fieldLength: Int? = null
 }
-
-class FileOutput {
-    var fileName: String = ""
-    var records: List<Map<String, String>> = mutableListOf()
-}
-
-class FileResult<T>(var fileName: String) {
-
-    var records: MutableList<T> = mutableListOf()
-}
-
-class FileRipperException : Exception {
-    constructor(message: String) : super(message) {}
-
-    constructor(cause: Throwable) : super(cause) {}
-
-    constructor(message: String, cause: Throwable) : super(message, cause) {}
-}

@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.apache.commons.lang3.StringUtils.join
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import kotlin.test.assertFailsWith
 
@@ -19,6 +19,7 @@ class FileRipperTest {
     @Test
     fun testRipFile_GivenFileAndFileDefinition_ReturnsFileOutput() {
         //arrange
+        println("Junit Version: ${junit.runner.Version.id()}")
         val file = Files.createTempFile("temp", ".temp").toFile()
         val expectedOutput = FileOutput()
         val fileDefinition = FileDefinition()
