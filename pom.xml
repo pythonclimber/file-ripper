@@ -270,6 +270,13 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <excludes>
+                                <exclude>**/DataExporter.*</exclude>
+                                <exclude>**/FileDefinition.*</exclude>
+                                <exclude>**/FileMover.*</exclude>
+                                <exclude>**/FileRepository.*</exclude>
+                                <exclude>**/Validators.*</exclude>
+                            </excludes>
                             <rules>
                                 <rule implementation="org.jacoco.maven.RuleConfiguration">
                                     <element>BUNDLE</element>

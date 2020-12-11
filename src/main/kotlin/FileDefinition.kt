@@ -12,7 +12,7 @@ class FileDefinition {
     lateinit var fieldDefinitions: MutableList<FieldDefinition>
     lateinit var recordXmlElement: String
     lateinit var inputDirectory: String
-    lateinit var completedDirectory: String
+    var completedDirectory: String? = null
 }
 
 class FieldDefinition {

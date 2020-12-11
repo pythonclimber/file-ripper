@@ -2,26 +2,25 @@ import org.apache.commons.lang3.StringUtils.isNotBlank
 import java.io.File
 import java.util.stream.Collectors.toList
 
-class FileRipper(private val fileRepository: FileRepository, private val fileMover: FileMover,
-                 private val dataExporter: DataExporter) {
+class FileRipper(private val fileRepository: FileRepository, private val fileMover: FileMover) {
     private var serviceFactory: (FileDefinition) -> FileService = (FileService)::create
 
-    constructor() : this(WildcardFileRepository(), DefaultFileMover(), DefaultDataExporter())
+    constructor() : this(WildcardFileRepository(), DefaultFileMover())
 
-    constructor(fileRepository: FileRepository) : this(fileRepository, DefaultFileMover(), DefaultDataExporter())
+    constructor(fileRepository: FileRepository) : this(fileRepository, DefaultFileMover())
 
-    constructor(fileMover: FileMover) : this(WildcardFileRepository(), fileMover, DefaultDataExporter())
+    constructor(fileMover: FileMover) : this(WildcardFileRepository(), fileMover)
 
-    constructor(dataExporter: DataExporter) : this(WildcardFileRepository(), DefaultFileMover(), dataExporter)
+//    constructor(dataExporter: DataExporter) : this(WildcardFileRepository(), DefaultFileMover())
 
-    constructor(fileRepository: FileRepository, fileMover: FileMover) : this(fileRepository, fileMover, DefaultDataExporter())
+//    constructor(fileRepository: FileRepository, fileMover: FileMover) : this(fileRepository, fileMover)
 
-    constructor(fileRepository: FileRepository, dataExporter: DataExporter) : this(fileRepository, DefaultFileMover(), dataExporter)
+//    constructor(fileRepository: FileRepository, dataExporter: DataExporter) : this(fileRepository, DefaultFileMover())
 
-    constructor(fileMover: FileMover, dataExporter: DataExporter) : this(WildcardFileRepository(), fileMover, dataExporter)
+//    constructor(fileMover: FileMover, dataExporter: DataExporter) : this(WildcardFileRepository(), fileMover)
 
     internal constructor(fileRepository: FileRepository, serviceFactory: (FileDefinition) -> FileService,
-                         fileMover: FileMover) : this(fileRepository, fileMover, DefaultDataExporter()) {
+                         fileMover: FileMover) : this(fileRepository, fileMover) {
         this.serviceFactory = serviceFactory
     }
 

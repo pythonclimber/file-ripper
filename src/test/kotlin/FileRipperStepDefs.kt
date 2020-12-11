@@ -31,7 +31,7 @@ class FileRipperStepDefs {
         mockFileRepository = mockk()
         val mockFileMover = mockk<FileMover>()
         val mockDataExporter = mockk<DataExporter>()
-        fileRipper = FileRipper(mockFileRepository, mockFileMover, mockDataExporter)
+        fileRipper = FileRipper(mockFileRepository, mockFileMover)
     }
 
     @Given("a file whose fields are separated by a {string}")

@@ -139,7 +139,11 @@ class FileRipperTest {
         //arrange
         val file = Files.createTempFile("temp", ".temp").toFile()
         val expectedOutput = FileOutput()
-        val fileDefinition = FileDefinition()
+        val fileDefinition = FileDefinition().apply {
+            inputDirectory = ""
+            fileMask = ""
+            completedDirectory = ""
+        }
 
         every { mockFileRepository.getFiles(allAny(), allAny()) } returns mutableListOf(file)
         every { mockFileService.processFile(file) } returns expectedOutput
@@ -156,7 +160,11 @@ class FileRipperTest {
     fun testFindAndRipFiles_GivenFileDefinitionAndObjectBuilder_ReturnsFileResult() {
         //arrange
         val file = createTempFile("temp", ".temp")
-        val fileDefinition = FileDefinition()
+        val fileDefinition = FileDefinition().apply {
+            inputDirectory = ""
+            fileMask = ""
+            completedDirectory = ""
+        }
 
         val fieldMap = mutableMapOf<String, String>()
         fieldMap["1"] = "Aaron"
