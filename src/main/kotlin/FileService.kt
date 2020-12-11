@@ -1,21 +1,21 @@
-package com.ohgnarly.fileripper
-
 import org.apache.commons.lang3.StringUtils
 import org.w3c.dom.Element
 import java.io.File
-import java.nio.file.Files
-import java.util.ArrayList
-import java.util.LinkedHashMap
+import java.nio.file.Files.readAllLines
+import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 
 abstract class FileService protected constructor(protected var fileDefinition: FileDefinition) {
     @Throws(FileRipperException::class)
     abstract fun processFile(file: File): FileOutput
 
+    abstract fun isDefinitionValid(): ValidationResult
+
     companion object : (FileDefinition) -> FileService {
         override fun invoke(fileDefinition: FileDefinition): FileService {
             return when (fileDefinition.fileType) {
-                FileType.DELIMITED, FileType.FIXED -> FlatFileService(fileDefinition)
+                FileType.DELIMITED -> DelimitedFileService(fileDefinition)
+                FileType.FIXED -> FixedFileService(fileDefinition)
                 FileType.XML -> XmlFileService(fileDefinition)
                 else -> throw IllegalArgumentException("Invalid file type provided")
             }
@@ -27,61 +27,33 @@ abstract class FileService protected constructor(protected var fileDefinition: F
     }
 }
 
-class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefinition) {
+abstract class FlatFileService(fileDefinition: FileDefinition) : FileService(fileDefinition) {
     override fun processFile(file: File): FileOutput {
-        val fileOutput = FileOutput()
-        fileOutput.fileName = file.name
-        fileOutput.records = processLines(Files.readAllLines(file.toPath()))
-        return fileOutput
+        val validationResult = isDefinitionValid()
+        if (!validationResult.isValid()) {
+            throw FileRipperException("File definition is missing the following fields: ${validationResult.getValidationMessage()}")
+        }
+
+        return FileOutput().apply {
+            fileName = file.name
+            records = processLines(readAllLines(file.toPath()))
+        }
     }
 
     private fun processLines(lines: MutableList<String>): List<Map<String, String>> {
-        val records = ArrayList<Map<String, String>>()
+        val records = mutableListOf<Map<String, String>>()
         if (fileDefinition.hasHeader) { //if list has header, remove first line in list
             lines.removeAt(0)
         }
 
         for (line in lines) {
-            if (fileDefinition.fileType === FileType.DELIMITED) {
-                records.add(processDelimitedLine(line))
-            } else if (fileDefinition.fileType === FileType.FIXED) {
-                records.add(processFixedLine(line))
-            }
+            records.add(processLine(line))
         }
+
         return records
     }
 
-    private fun processDelimitedLine(line: String): Map<String, String> {
-        val fields = StringUtils.split(line, fileDefinition.delimiter)
-        if (fields.size < fileDefinition.fieldDefinitions.size) {
-            throw FileRipperException(java.lang.String.format("Record '%s' has invalid number of fields", line))
-        }
-
-        val record = LinkedHashMap<String, String>()
-        for (i in fields.indices) {
-            val fieldName = fileDefinition.fieldDefinitions[i].fieldName
-            val fieldValue = fields[i]
-
-
-            record[fieldName] = fieldValue
-        }
-        return record
-    }
-
-    private fun processFixedLine(line: String): Map<String, String> {
-        val record = LinkedHashMap<String, String>()
-        for (fieldDefinition in fileDefinition.fieldDefinitions) {
-            val startPosition = fieldDefinition.startPosition!!
-            val endPosition = fieldDefinition.startPosition!! + fieldDefinition.fieldLength!!
-            if (startPosition > line.length || endPosition > line.length) {
-                throw FileRipperException("Invalid line length in fixed width file.")
-            }
-
-            val fieldValue = line.substring(fieldDefinition.startPosition!!, endPosition).trim { it <= ' ' }
-            record[fieldDefinition.fieldName] = fieldValue
-        }
-        return record
-    }
+    protected abstract fun processLine(line: String): Map<String, String>
 }
 
 class XmlFileService(fileDefinition: FileDefinition) : FileService(fileDefinition) {
@@ -112,5 +84,63 @@ class XmlFileService(fileDefinition: FileDefinition) : FileService(fileDefinitio
         }
         fileOutput.records = records
         return fileOutput
+    }
+
+    override fun isDefinitionValid(): ValidationResult {
+        val missingFields = mutableListOf<String>()
+
+        if (fileDefinition.delimiter.isBlank()) {
+            missingFields.add("delimiter")
+        }
+
+        return ValidationResult(mutableListOf())
+    }
+}
+
+class DelimitedFileService(fileDefinition: FileDefinition) : FlatFileService(fileDefinition) {
+    override fun processLine(line: String): Map<String, String> {
+        val fields = StringUtils.split(line, fileDefinition.delimiter)
+        if (fields.size < fileDefinition.fieldDefinitions.size) {
+            throw FileRipperException(java.lang.String.format("Record '%s' has invalid number of fields", line))
+        }
+
+        val record = LinkedHashMap<String, String>()
+        for (fieldDefinition in fileDefinition.fieldDefinitions) {
+            val fieldName = fieldDefinition.fieldName
+            val fieldValue = fields[fieldDefinition.positionInRow!!]
+            record[fieldName] = fieldValue
+        }
+        return record
+    }
+
+    override fun isDefinitionValid(): ValidationResult {
+        val missingFields = mutableListOf<String>()
+
+        if (fileDefinition.delimiter.isBlank()) {
+            missingFields.add("delimiter")
+        }
+
+        return ValidationResult(missingFields)
+    }
+}
+
+class FixedFileService(fileDefinition: FileDefinition) : FlatFileService(fileDefinition) {
+    override fun processLine(line: String): Map<String, String> {
+        val record = LinkedHashMap<String, String>()
+        for (fieldDefinition in fileDefinition.fieldDefinitions) {
+            val startPosition = fieldDefinition.startPosition!!
+            val endPosition = fieldDefinition.startPosition!! + fieldDefinition.fieldLength!!
+            if (startPosition > line.length || endPosition > line.length) {
+                throw FileRipperException("Invalid line length in fixed width file.")
+            }
+
+            val fieldValue = line.substring(fieldDefinition.startPosition!!, endPosition).trim { it <= ' ' }
+            record[fieldDefinition.fieldName] = fieldValue
+        }
+        return record
+    }
+
+    override fun isDefinitionValid(): ValidationResult {
+        return ValidationResult(mutableListOf())
     }
 }

@@ -1,5 +1,3 @@
-package com.ohgnarly.fileripper
-
 enum class FileType {
     DELIMITED,
     FIXED,
@@ -7,20 +5,20 @@ enum class FileType {
 }
 
 class FileDefinition {
-
-    var fileMask: String = ""
-    var fileType: FileType? = null
+    lateinit var fileMask: String
+    lateinit var fileType: FileType
     var hasHeader: Boolean = false
-    var delimiter: String = ""
-    var fieldDefinitions: MutableList<FieldDefinition> = mutableListOf()
-    var recordXmlElement: String = ""
-    var inputDirectory: String = ""
-    var completedDirectory: String? = null
+    lateinit var delimiter: String
+    lateinit var fieldDefinitions: MutableList<FieldDefinition>
+    lateinit var recordXmlElement: String
+    lateinit var inputDirectory: String
+    lateinit var completedDirectory: String
 }
 
 class FieldDefinition {
-
-    var fieldName: String = ""
+    lateinit var fieldName: String
     var startPosition: Int? = null
     var fieldLength: Int? = null
+    var positionInRow: Int? = null
+    lateinit var xmlFieldName: String
 }

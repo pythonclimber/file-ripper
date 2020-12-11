@@ -1,27 +1,21 @@
 package com.ohgnarly.fileripper
 
+import DataExporter
+import FileDefinition
+import FileMover
+import FileOutput
+import FileRepository
+import FileResult
+import FileRipper
 import io.cucumber.java.Before
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
-import io.cucumber.junit.Cucumber
-import io.cucumber.junit.CucumberOptions
 import io.mockk.every
 import io.mockk.mockk
 import org.apache.commons.lang3.StringUtils
 import org.junit.Assert.*
-import org.junit.runner.RunWith
 import java.io.File
-
-@RunWith(Cucumber::class)
-@CucumberOptions(
-        tags = ["@FileRipper"],
-        strict = true,
-        features = ["src/test/resources/features"],
-        plugin = ["pretty", "junit:target/cucumber/report.xml"],
-        snippets = CucumberOptions.SnippetType.CAMELCASE)
-class FileRipperCukeRunner
-
 
 class FileRipperStepDefs {
     private lateinit var fileOutputList: List<FileOutput>

@@ -1,5 +1,12 @@
 package com.ohgnarly.fileripper
 
+import FileDefinition
+import FileMover
+import FileOutput
+import FileRepository
+import FileRipper
+import FileRipperException
+import FileService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -19,7 +26,6 @@ class FileRipperTest {
     @Test
     fun testRipFile_GivenFileAndFileDefinition_ReturnsFileOutput() {
         //arrange
-        println("Junit Version: ${junit.runner.Version.id()}")
         val file = Files.createTempFile("temp", ".temp").toFile()
         val expectedOutput = FileOutput()
         val fileDefinition = FileDefinition()

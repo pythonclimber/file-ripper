@@ -1,5 +1,3 @@
-package com.ohgnarly.fileripper
-
 import org.apache.commons.lang3.StringUtils.isNotBlank
 import java.io.File
 import java.util.stream.Collectors.toList
@@ -84,7 +82,6 @@ class FileOutput {
 }
 
 class FileResult<T>(var fileName: String) {
-
     var records: MutableList<T> = mutableListOf()
 }
 

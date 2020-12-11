@@ -1,7 +1,7 @@
 @FileRipper
 Feature: File Ripper Business Features
 
-  Scenario Outline: A delimited file is processed by file ripper
+  Scenario Outline: A delimited file is processed by file ripper and returned as a map
     Given a file whose fields are separated by a '<delimiter>'
     When the file is ripped as output
     Then the file data is returned as map
@@ -24,7 +24,7 @@ Feature: File Ripper Business Features
     Then the file data is returned as map
 
 
-  Scenario Outline: A delimited file is processed by file ripper
+  Scenario Outline: A delimited file is processed by file ripper and returned as an object
     Given a file whose fields are separated by a '<delimiter>'
     When the file is ripped as result
     Then the file data is returned as object
@@ -45,4 +45,3 @@ Feature: File Ripper Business Features
     Given a file in xml format
     When the file is ripped as result
     Then the file data is returned as object
-
