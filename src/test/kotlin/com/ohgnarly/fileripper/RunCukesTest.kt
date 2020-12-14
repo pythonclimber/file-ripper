@@ -11,4 +11,4 @@ import org.junit.runner.RunWith
         features = ["src/test/resources/features"],
         plugin = ["pretty", "junit:target/cucumber/report.xml"],
         snippets = CucumberOptions.SnippetType.CAMELCASE)
-class RunCukesTest {}
+class RunCukesTest

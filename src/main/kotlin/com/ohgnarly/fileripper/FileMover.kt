@@ -1,6 +1,10 @@
+package com.ohgnarly.fileripper
+
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Files.*
 import java.nio.file.Paths
+import java.nio.file.Paths.*
 
 interface FileMover {
     fun moveFiles(files: List<File>, completedDirectory: String)
@@ -8,9 +12,12 @@ interface FileMover {
 
 class DefaultFileMover : FileMover {
     override fun moveFiles(files: List<File>, completedDirectory: String) {
+        if (!exists(get(completedDirectory))) {
+            createDirectory(get(completedDirectory))
+        }
+
         for (file in files) {
-            val completedPath = Paths.get(completedDirectory, file.name)
-            Files.move(file.toPath(), completedPath)
+            move(file.toPath(), get(completedDirectory, file.name))
         }
     }
 }

@@ -1,5 +1,8 @@
+package com.ohgnarly.fileripper
+
 import org.apache.commons.lang3.StringUtils
 import org.w3c.dom.Element
+import org.xml.sax.SAXParseException
 import java.io.File
 import java.nio.file.Files.readAllLines
 import java.util.*
@@ -62,27 +65,31 @@ class XmlFileService(fileDefinition: FileDefinition) : FileService(fileDefinitio
         fileOutput.fileName = file.name
         val records = ArrayList<Map<String, String>>()
 
-        val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val doc = documentBuilder.parse(file)
-        val root = doc.documentElement
-        val nodes = root.getElementsByTagName(fileDefinition.recordXmlElement)
-        for (i in 0 until nodes.length) {
-            val person = nodes.item(i) as Element
-            val record = LinkedHashMap<String, String>()
-            for (fieldDefinition in fileDefinition.fieldDefinitions) {
-                val fieldNodes = person.getElementsByTagName(fieldDefinition.fieldName)
-                if (fieldNodes.length == 0) {
-                    throw FileRipperException(java.lang.String.format("Field %s is does not exist in file",
-                            fieldDefinition.fieldName))
-                }
+        try {
+            val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            val doc = documentBuilder.parse(file)
+            val root = doc.documentElement
+            val nodes = root.getElementsByTagName(fileDefinition.recordXmlElement)
+            for (i in 0 until nodes.length) {
+                val person = nodes.item(i) as Element
+                val record = LinkedHashMap<String, String>()
+                for (fieldDefinition in fileDefinition.fieldDefinitions) {
+                    val fieldNodes = person.getElementsByTagName(fieldDefinition.fieldName)
+                    if (fieldNodes.length == 0) {
+                        throw FileRipperException(java.lang.String.format("Field %s is does not exist in file",
+                                fieldDefinition.fieldName))
+                    }
 
-                val fieldName = fieldNodes.item(0).nodeName
-                val fieldValue = fieldNodes.item(0).textContent
-                record[fieldName] = fieldValue
+                    val fieldName = fieldNodes.item(0).nodeName
+                    val fieldValue = fieldNodes.item(0).textContent
+                    record[fieldName] = fieldValue
+                }
+                records.add(record)
             }
-            records.add(record)
+            fileOutput.records = records
+        } catch (ex: SAXParseException) {
+            throw FileRipperException("Input file is not valid XML", ex)
         }
-        fileOutput.records = records
         return fileOutput
     }
 
@@ -101,7 +108,7 @@ class DelimitedFileService(fileDefinition: FileDefinition) : FlatFileService(fil
     override fun processLine(line: String): Map<String, String> {
         val fields = StringUtils.split(line, fileDefinition.delimiter)
         if (fields.size < fileDefinition.fieldDefinitions.size) {
-            throw FileRipperException(java.lang.String.format("Record '%s' has invalid number of fields", line))
+            throw FileRipperException("Record '${line}' has invalid number of fields")
         }
 
         val record = LinkedHashMap<String, String>()

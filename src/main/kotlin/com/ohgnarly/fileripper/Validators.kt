@@ -1,3 +1,5 @@
+package com.ohgnarly.fileripper
+
 abstract class FileDefinitionValidator {
     abstract fun isDefinitionValid(): Boolean
 }

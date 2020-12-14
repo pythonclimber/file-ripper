@@ -1,12 +1,7 @@
 package com.ohgnarly.fileripper
 
-import DataExporter
-import FileDefinition
-import FileMover
-import FileOutput
-import FileRepository
-import FileResult
-import FileRipper
+import cucumber.api.PendingException
+import io.cucumber.java.After
 import io.cucumber.java.Before
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
@@ -14,24 +9,44 @@ import io.cucumber.java.en.When
 import io.mockk.every
 import io.mockk.mockk
 import org.apache.commons.lang3.StringUtils
+import org.assertj.core.api.AbstractThrowableAssert
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.*
 import org.junit.Assert.*
+import org.xml.sax.SAXParseException
 import java.io.File
-
+import java.lang.IndexOutOfBoundsException
+import java.nio.file.Files
+import java.nio.file.Files.*
+import java.nio.file.Paths
+import java.nio.file.Paths.*
 class FileRipperStepDefs {
     private lateinit var fileOutputList: List<FileOutput>
     private lateinit var fileRipper: FileRipper
     private lateinit var fileDefinition: FileDefinition
     private lateinit var fileResultList: List<FileResult<Person>>
     private lateinit var mockFileRepository: FileRepository
-    private var file: File = createTempFile("Hello", ".txt")
-
+    private lateinit var throwableAssert: AbstractThrowableAssert<*, out Throwable>
+    private var file: File = File("Hello-${System.currentTimeMillis()}.txt")
 
     @Before
     fun setUp() {
+        println(get("").toAbsolutePath())
         mockFileRepository = mockk()
         val mockFileMover = mockk<FileMover>()
         val mockDataExporter = mockk<DataExporter>()
         fileRipper = FileRipper(mockFileRepository, mockFileMover)
+
+        if (!exists(get("files"))) {
+            createDirectory(get("files"))
+        }
+    }
+
+    @After
+    fun tearDown() {
+        File("files/").listFiles().forEach { file ->
+            file.deleteRecursively()
+        }
     }
 
     @Given("a file whose fields are separated by a {string}")
@@ -85,6 +100,82 @@ class FileRipperStepDefs {
         assertPeople(fileResult.records)
     }
 
+    @Given("fixed files stored on file system")
+    fun filesStoredOnFileSystem() {
+        buildFixedFile(true)
+    }
+
+    @Given("a fixed file definition")
+    fun aFixedFileDefinition() {
+        fileDefinition = buildFixedFileDefinition()
+    }
+
+    @Given("file definition has input directory, file mask")
+    fun fileDefinitionHasInputDirectoryFileMask() {
+        fileDefinition.inputDirectory = "${get("").toAbsolutePath()}/files"
+        fileDefinition.fileMask = "Valid-Fixed-*.txt"
+    }
+
+    @Given("file definition has completed directory")
+    fun fileDefinitionHasCompletedDirectory() {
+        fileDefinition.completedDirectory = "${fileDefinition.inputDirectory}/completed"
+    }
+
+    @Given("a xml file definition")
+    fun aXmlFileDefinition() {
+        fileDefinition = buildXmlFileDefinition()
+    }
+
+    @Given("a delimited file definition with {string}")
+    fun aDelimitedFileDefinitionWith(delimiter: String) {
+        fileDefinition = buildDelimitedFileDefinition(delimiter)
+    }
+
+    @When("the files are found and ripped")
+    fun theFilesAreFoundAndRipped() {
+        fileRipper = FileRipper()
+        fileOutputList = fileRipper.findAndRipFiles(fileDefinition)
+    }
+
+    @When("the file is ripped")
+    fun theFileIsRipped() {
+        throwableAssert = assertThatThrownBy { fileRipper.ripFile(file, fileDefinition) }
+    }
+
+    @Then("data is returned for all files")
+    fun dataIsReturnedForAllFiles() {
+        fileOutputList.forEach {
+            assertThat(it.fileName).matches("Valid-[A-Za-z0-9\\-]*.txt")
+            assertRecords(it.records)
+        }
+    }
+
+    @Then("files are still in input directory")
+    fun filesAreStillInInputDirectory() {
+        fileOutputList.forEach {
+            val filePath = get("${get("").toAbsolutePath()}/files/${it.fileName}")
+            exists(filePath)
+        }
+    }
+
+    @Then("files are in completed directory")
+    fun filesAreInCompletedDirectory() {
+        fileOutputList.forEach {
+            val filePath = get("${get("").toAbsolutePath()}/files/completed/${it.fileName}")
+            exists(filePath)
+        }
+    }
+
+    @Then("file ripper throws exception")
+    fun fileRipperThrowsException() {
+        throwableAssert.isInstanceOf(FileRipperException::class.java)
+    }
+
+    @Then("exception contains {string}")
+    fun exceptionContainsMessage(message: String) {
+        throwableAssert.hasMessageFindingMatch(message)
+    }
+
     private fun assertRecords(records: List<Map<String, String>>) {
         assertEquals("Aaron", records[0]["name"])
         assertEquals("39", records[0]["age"])
@@ -100,3 +191,4 @@ class FileRipperStepDefs {
         assertEquals("04/13/2007", records[3]["dob"])
     }
 }
+

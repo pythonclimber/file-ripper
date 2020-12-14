@@ -1,19 +1,16 @@
 package com.ohgnarly.fileripper
 
-import FileDefinition
-import FileMover
-import FileOutput
-import FileRepository
-import FileRipper
-import FileRipperException
-import FileService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.apache.commons.lang3.StringUtils.join
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.io.File
 import java.nio.file.Files
+import java.nio.file.Paths
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertFailsWith
 
 class FileRipperTest {
@@ -26,7 +23,7 @@ class FileRipperTest {
     @Test
     fun testRipFile_GivenFileAndFileDefinition_ReturnsFileOutput() {
         //arrange
-        val file = Files.createTempFile("temp", ".temp").toFile()
+        val file = File("files/temp${System.currentTimeMillis()}.temp")
         val expectedOutput = FileOutput()
         val fileDefinition = FileDefinition()
 
@@ -44,13 +41,13 @@ class FileRipperTest {
     @Test
     fun testRipFile_GivenFileServiceThrowsException_ThrowsException() {
         //arrange
-        val file = Files.createTempFile("temp", ".temp").toFile()
+        val file = File("files/temp${System.currentTimeMillis()}.temp")
         val fileDefinition = FileDefinition()
 
         every { mockFileService.processFile(file) } throws FileRipperException("Yay!")
 
         //act
-        val exception = assertFailsWith<FileRipperException> {fileRipper.ripFile(file, fileDefinition)}
+        val exception = assertFailsWith<FileRipperException> { fileRipper.ripFile(file, fileDefinition) }
 
         //arrange
         assertEquals("Yay!", exception.message)
@@ -59,7 +56,7 @@ class FileRipperTest {
     @Test
     fun testRipFile_GivenFileAndFileDefinitionAndObjectBuilder_ReturnsFileResult() {
         //arrange
-        val file = createTempFile("temp", ".temp")
+        val file = File("files/temp${System.currentTimeMillis()}.temp")
         val fileDefinition = FileDefinition()
 
         val fieldMap = mutableMapOf<String, String>()
@@ -86,7 +83,7 @@ class FileRipperTest {
     @Test
     fun testRipFiles_GivenFileListAndFileDefinition_ReturnsListOfFileOutput() {
         //arrange
-        val file = Files.createTempFile("temp", ".temp").toFile()
+        val file = File("files/temp${System.currentTimeMillis()}.temp")
         val expectedOutput = FileOutput()
         val fileDefinition = FileDefinition().apply {
             completedDirectory = "/completed/"
@@ -106,7 +103,7 @@ class FileRipperTest {
     @Test
     fun testRipFiles_GivenFileListAndFileDefinitionAndObjectBuilder_ReturnsFileResult() {
         //arrange
-        val file = createTempFile("temp", ".temp")
+        val file = File("files/temp${System.currentTimeMillis()}.temp")
         val fileDefinition = FileDefinition().apply {
             completedDirectory = "/completed/"
         }
@@ -137,7 +134,7 @@ class FileRipperTest {
     @Test
     fun testFindAndRipFiles_GivenFileDefinition_ReturnsListOfFileOutput() {
         //arrange
-        val file = Files.createTempFile("temp", ".temp").toFile()
+        val file = File("files/temp${System.currentTimeMillis()}.temp")
         val expectedOutput = FileOutput()
         val fileDefinition = FileDefinition().apply {
             inputDirectory = ""
@@ -159,7 +156,7 @@ class FileRipperTest {
     @Test
     fun testFindAndRipFiles_GivenFileDefinitionAndObjectBuilder_ReturnsFileResult() {
         //arrange
-        val file = createTempFile("temp", ".temp")
+        val file = File("files/temp${System.currentTimeMillis()}.temp")
         val fileDefinition = FileDefinition().apply {
             inputDirectory = ""
             fileMask = ""

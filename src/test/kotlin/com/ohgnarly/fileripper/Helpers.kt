@@ -1,13 +1,11 @@
 package com.ohgnarly.fileripper
 
-import FieldDefinition
-import FileDefinition
-import FileType
 import org.apache.commons.lang3.StringUtils
 import org.junit.Assert
 import org.junit.Assert.*
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Files.*
 import kotlin.test.assertEquals
 
 class Person(var name: String, var age: String, var dob: String)
@@ -148,7 +146,8 @@ fun assertPerson(person: Person, name: String, age: String, dob: String) {
 }
 
 fun writeFile(prefix: String, suffix: String, lines: List<String>): File {
-    return Files.write(createTempFile(prefix, suffix).toPath(), lines).toFile()
+    val fileName = "files/$prefix${System.currentTimeMillis()}$suffix"
+    return write(File(fileName).toPath(), lines).toFile()
 }
 
 private fun buildXmlRecord(fields: List<String>): List<String> {

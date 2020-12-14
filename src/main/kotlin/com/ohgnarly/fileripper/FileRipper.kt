@@ -1,3 +1,5 @@
+package com.ohgnarly.fileripper
+
 import org.apache.commons.lang3.StringUtils.isNotBlank
 import java.io.File
 import java.util.stream.Collectors.toList
@@ -11,13 +13,13 @@ class FileRipper(private val fileRepository: FileRepository, private val fileMov
 
     constructor(fileMover: FileMover) : this(WildcardFileRepository(), fileMover)
 
-//    constructor(dataExporter: DataExporter) : this(WildcardFileRepository(), DefaultFileMover())
+//    constructor(dataExporter: com.ohgnarly.fileripper.DataExporter) : this(com.ohgnarly.fileripper.WildcardFileRepository(), com.ohgnarly.fileripper.DefaultFileMover())
 
-//    constructor(fileRepository: FileRepository, fileMover: FileMover) : this(fileRepository, fileMover)
+//    constructor(fileRepository: com.ohgnarly.fileripper.FileRepository, fileMover: com.ohgnarly.fileripper.FileMover) : this(fileRepository, fileMover)
 
-//    constructor(fileRepository: FileRepository, dataExporter: DataExporter) : this(fileRepository, DefaultFileMover())
+//    constructor(fileRepository: com.ohgnarly.fileripper.FileRepository, dataExporter: com.ohgnarly.fileripper.DataExporter) : this(fileRepository, com.ohgnarly.fileripper.DefaultFileMover())
 
-//    constructor(fileMover: FileMover, dataExporter: DataExporter) : this(WildcardFileRepository(), fileMover)
+//    constructor(fileMover: com.ohgnarly.fileripper.FileMover, dataExporter: com.ohgnarly.fileripper.DataExporter) : this(com.ohgnarly.fileripper.WildcardFileRepository(), fileMover)
 
     internal constructor(fileRepository: FileRepository, serviceFactory: (FileDefinition) -> FileService,
                          fileMover: FileMover) : this(fileRepository, fileMover) {
@@ -119,19 +121,3 @@ class FileRipper(private val fileRepository: FileRepository, private val fileMov
     }
 }
 
-class FileOutput {
-    var fileName: String = ""
-    var records: List<Map<String, String>> = mutableListOf()
-}
-
-class FileResult<T>(var fileName: String) {
-    var records: MutableList<T> = mutableListOf()
-}
-
-class FileRipperException : Exception {
-    constructor(message: String) : super(message) {}
-
-    constructor(cause: Throwable) : super(cause) {}
-
-    constructor(message: String, cause: Throwable) : super(message, cause) {}
-}

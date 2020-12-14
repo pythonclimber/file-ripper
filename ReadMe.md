@@ -71,9 +71,9 @@ public class FileDefinitionBuilder {
 
 ## Ripping Files
 
-Using create an instance of the FileRipper class to get started ripping your files.  Your file can be parsed into a FileOutput object which contains the data in a Map<String, String>.  This is perfect for turning your data into a json object for export to an API.
+Using create an instance of the com.ohgnarly.fileripper.FileRipper class to get started ripping your files.  Your file can be parsed into a com.ohgnarly.fileripper.FileOutput object which contains the data in a Map<String, String>.  This is perfect for turning your data into a json object for export to an API.
 
-Alternatively, you can receive your file as a FileResult and have the data parsed into a list of generic objects by passing in a builder function.  
+Alternatively, you can receive your file as a com.ohgnarly.fileripper.FileResult and have the data parsed into a list of generic objects by passing in a builder function.  
 
 ```java
 public class FileProcessor {
@@ -82,7 +82,7 @@ public class FileProcessor {
         FileRipper fileRipper = new FileRipper();
         
         FileOutput fileOutput = fileRipper.ripFile(file, fileDefinition);
-        FileResult<Person> fileResult = fileRipper.ripFile(file, fileDefinition, this::buildPerson);
+        com.ohgnarly.fileripper.FileResult<Person> fileResult = fileRipper.ripFile(file, fileDefinition, this::buildPerson);
     }
     
     private Person buildPerson(Map<String, String> fields) {
@@ -95,7 +95,7 @@ public class FileProcessor {
 }
 ```
 
-The FileRipper class also supports ripping multiple files using both output types.
+The com.ohgnarly.fileripper.FileRipper class also supports ripping multiple files using both output types.
 
 ```java
 public class FileProcessor {
@@ -104,7 +104,7 @@ public class FileProcessor {
         FileRipper fileRipper = new FileRipper();
         
         List<FileOutput> fileOutputList = fileRipper.ripFile(files, fileDefinition);
-        List<FileResult<Person>> fileResultList = fileRipper.ripFile(files, fileDefinition, this::buildPerson);
+        List<com.ohgnarly.fileripper.FileResult<Person>> fileResultList = fileRipper.ripFile(files, fileDefinition, this::buildPerson);
     }
     
     private Person buildPerson(Map<String, String> fields) {
@@ -120,7 +120,7 @@ public class FileProcessor {
 
 ## Finding and Ripping Files
 
-FileRipper also supports finding your files on the file system and ripping them for you.  This saves you the time of looking up your files first.
+com.ohgnarly.fileripper.FileRipper also supports finding your files on the file system and ripping them for you.  This saves you the time of looking up your files first.
 
 ```java
 public class FileProcessor {
@@ -132,7 +132,7 @@ public class FileProcessor {
         
         //As with other file ripping methods, both return types are supported
         List<FileOutput> fileOutputList = new FileRipper().findAndRipFiles(fileDefinition);
-        List<FileResult<Person>> fileResultList = new FileRipper().findAndRipFiles(fileDefinition, PersonBuilder::buildPerson);
+        List<com.ohgnarly.fileripper.FileResult<Person>> fileResultList = new FileRipper().findAndRipFiles(fileDefinition, PersonBuilder::buildPerson);
     }
 }
 ```
@@ -140,13 +140,13 @@ public class FileProcessor {
 
 ## Optional Functionality
 
-### Create your own FileRepository
+### Create your own com.ohgnarly.fileripper.FileRepository
 
-By default, FileRipper uses glob pattern wildcards for looking up your files.  By creating your own instance of the FileRepository interface, you can define your own file lookup.  Here is an example of a regex repository instead.
+By default, com.ohgnarly.fileripper.FileRipper uses glob pattern wildcards for looking up your files.  By creating your own instance of the com.ohgnarly.fileripper.FileRepository interface, you can define your own file lookup.  Here is an example of a regex repository instead.
 
 
 ```java
-public class RegexFileRepository implements FileRepository {
+import com.ohgnarly.fileripper.FileRepository;public class RegexFileRepository implements FileRepository {
     @NotNull
     @Override
     public List<File> getFiles(@NotNull String inputDirectory, @NotNull String fileMask) {
@@ -173,7 +173,7 @@ public class FileProcessor {
 
 ### Moving Files to a completed directory
 
-The FileDefinition contains a field for completedDirectory.  If you set this field, the FileRipper will attempt to move any files processed under that definition to the path specified.
+The FileDefinition contains a field for completedDirectory.  If you set this field, the com.ohgnarly.fileripper.FileRipper will attempt to move any files processed under that definition to the path specified.
 
 ```java
 public class FileDefinitionBuilder {
@@ -185,10 +185,10 @@ public class FileDefinitionBuilder {
 }
 ```
 
-Additionally, if needed, you can provide your own implementation of the FileMover interface to the FileRipper to define specifically how the files should be moved.
+Additionally, if needed, you can provide your own implementation of the com.ohgnarly.fileripper.FileMover interface to the com.ohgnarly.fileripper.FileRipper to define specifically how the files should be moved.
 
 ```java
-public class MyFileMover implements FileMover {
+import com.ohgnarly.fileripper.FileMover;import com.ohgnarly.fileripper.FileRipper;public class MyFileMover implements FileMover {
     public void moveFiles(List<File> files, String completedDirectory) {
         //code to define custom file move operation
     }

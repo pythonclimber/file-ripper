@@ -1,3 +1,5 @@
+package com.ohgnarly.fileripper
+
 import org.apache.commons.io.filefilter.WildcardFileFilter
 import java.io.File
 import java.io.FileFilter
