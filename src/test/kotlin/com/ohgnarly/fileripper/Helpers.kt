@@ -1,11 +1,8 @@
 package com.ohgnarly.fileripper
 
 import org.apache.commons.lang3.StringUtils
-import org.junit.Assert
-import org.junit.Assert.*
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Files.*
+import java.nio.file.Files.write
 import kotlin.test.assertEquals
 
 class Person(var name: String, var age: String, var dob: String)
@@ -16,9 +13,9 @@ fun buildPerson(fields: Map<String, String>): Person {
 
 fun buildDelimitedFileDefinition(delimiter: String): FileDefinition {
     val fieldDefinitions = mutableListOf<FieldDefinition>().apply {
-        add(buildFieldDefinition("name", null, null, 0))
-        add(buildFieldDefinition("age", null, null, 1))
-        add(buildFieldDefinition("dob", null, null, 2))
+        add(buildFieldDefinition("name", null, null, 0, null))
+        add(buildFieldDefinition("age", null, null, 1, null))
+        add(buildFieldDefinition("dob", null, null, 2, null))
     }
 
     return FileDefinition().apply {
@@ -33,12 +30,12 @@ fun buildDelimitedFileDefinition(delimiter: String): FileDefinition {
 
 fun buildXmlFileDefinition(): FileDefinition {
     val fieldDefinitions = mutableListOf<FieldDefinition>().apply {
-        add(buildFieldDefinition("name", null, null, null))
-        add(buildFieldDefinition("age", null, null, null))
-        add(buildFieldDefinition("dob", null, null, null))
+        add(buildFieldDefinition("name", null, null, null, null))
+        add(buildFieldDefinition("age", null, null, null, null))
+        add(buildFieldDefinition("dob", null, null, null, null))
     }
 
-    val fileDefinition = FileDefinition().apply {
+    return FileDefinition().apply {
         fileType = FileType.XML
         fileMask = "Valid-Xml-*.txt"
         hasHeader = false
@@ -46,15 +43,13 @@ fun buildXmlFileDefinition(): FileDefinition {
         this.fieldDefinitions = fieldDefinitions
         inputDirectory = "/path"
     }
-
-    return fileDefinition
 }
 
 fun buildFixedFileDefinition(): FileDefinition {
     val fieldDefinitions = mutableListOf<FieldDefinition>().apply {
-        add(buildFieldDefinition("name", 0, 20, null))
-        add(buildFieldDefinition("age", 20, 5, null))
-        add(buildFieldDefinition("dob", 25, 10, null))
+        add(buildFieldDefinition("name", 0, 20, null, null))
+        add(buildFieldDefinition("age", 20, 5, null, null))
+        add(buildFieldDefinition("dob", 25, 10, null, null))
     }
 
 
@@ -67,12 +62,13 @@ fun buildFixedFileDefinition(): FileDefinition {
     }
 }
 
-fun buildFieldDefinition(fieldName: String, startPosition: Int?, fieldLength: Int?, positionInRow: Int?): FieldDefinition {
+fun buildFieldDefinition(fieldName: String, startPosition: Int?, fieldLength: Int?, positionInRow: Int?, xmlFieldName: String?): FieldDefinition {
     return FieldDefinition().apply {
         this.fieldName = fieldName
         this.startPosition = startPosition
         this.fieldLength = fieldLength
         this.positionInRow = positionInRow
+        this.xmlFieldName = xmlFieldName
     }
 }
 
@@ -130,6 +126,19 @@ fun assertFileRecord(record: Map<String, Any>, name: String, age: String, dob: S
     assertEquals(name, record["name"])
     assertEquals(age, record["age"])
     assertEquals(dob, record["dob"])
+}
+
+fun assertFileRecordsWithRename(records: List<Map<String, Any>>) {
+    assertFileRecordWithRename(records[0], "Aaron", "39", "09/04/1980")
+    assertFileRecordWithRename(records[1], "Gene", "61", "01/15/1958")
+    assertFileRecordWithRename(records[2], "Alexander", "4", "11/22/2014")
+    assertFileRecordWithRename(records[3], "Mason", "12", "04/13/2007")
+}
+
+fun assertFileRecordWithRename(record: Map<String, Any>, name: String, age: String, dob: String) {
+    assertEquals(name, record["personName"])
+    assertEquals(age, record["personAge"])
+    assertEquals(dob, record["personDateOfBirth"])
 }
 
 fun assertPeople(people: List<Person>) {

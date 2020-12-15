@@ -2,6 +2,7 @@ package com.ohgnarly.fileripper
 
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.*
 import org.junit.Assert
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -91,7 +92,7 @@ class FixedFileServiceTest {
     fun testFileIsMissingConfiguredField() {
         //arrange
         val fileDefinition = buildFixedFileDefinition()
-        fileDefinition.fieldDefinitions.add(buildFieldDefinition("address", 36, 0, null))
+        fileDefinition.fieldDefinitions.add(buildFieldDefinition("address", 36, 0, null, null))
         flatFileService = FixedFileService(fileDefinition)
 
         val file = buildFixedFile(true)
@@ -126,11 +127,33 @@ class XmlFileServiceTest {
 
         val fileDefinition = buildXmlFileDefinition()
         fileDefinition.fieldDefinitions
-                .add(buildFieldDefinition("address", null, null, null))
+                .add(buildFieldDefinition("address", null, null, null, null))
         xmlFileService = XmlFileService(fileDefinition)
 
         //act
         assertThrows<FileRipperException> { xmlFileService.processFile(file) }
+    }
+
+    @Test
+    fun testRenameFieldInOutput() {
+        //arrange
+        val file = buildXmlFile()
+        val fileDefinition = buildXmlFileDefinition().apply {
+            this.fieldDefinitions = mutableListOf()
+            this.fieldDefinitions.add(buildFieldDefinition("personName", null, null, null, "name"))
+            this.fieldDefinitions.add(buildFieldDefinition("personAge", null, null, null, "age"))
+            this.fieldDefinitions.add(buildFieldDefinition("personDateOfBirth", null, null, null, "dob"))
+            this.fieldDefinitions.add(buildFieldDefinition("personName", null, null, null, "name"))
+        }
+
+        xmlFileService = XmlFileService(fileDefinition)
+
+        //act
+        val fileOutput = xmlFileService.processFile(file)
+
+        //assert
+        assertThat(fileOutput.fileName).isEqualTo(file.name)
+        assertFileRecordsWithRename(fileOutput.records)
     }
 }
 
@@ -156,7 +179,7 @@ class DelimitedFileServiceTest {
     fun testInvalidNumberOfFieldsConfigured() {
         //arrange
         val fileDefinition = buildDelimitedFileDefinition()
-        fileDefinition.fieldDefinitions.add(buildFieldDefinition("address", null, null, 3))
+        fileDefinition.fieldDefinitions.add(buildFieldDefinition("address", null, null, 3, null))
         delimitedFileService = DelimitedFileService(fileDefinition)
 
         val file = buildDelimitedFile()
@@ -176,7 +199,7 @@ class DelimitedFileServiceTest {
         delimitedFileService = DelimitedFileService(fileDefinition)
 
         //act
-        var assertThrows = Assertions.assertThatThrownBy { delimitedFileService.processFile(file) }
+        val assertThrows = assertThatThrownBy { delimitedFileService.processFile(file) }
 
         //assert
         assertThrows.isInstanceOf(FileRipperException::class.java)
@@ -196,9 +219,9 @@ class DelimitedFileServiceTest {
 
     private fun buildDelimitedFileDefinition(): FileDefinition {
         val fieldDefinitions = mutableListOf<FieldDefinition>().apply {
-            add(buildFieldDefinition("name", null, null, 0))
-            add(buildFieldDefinition("age", null, null, 2))
-            add(buildFieldDefinition("dob", null, null, 1))
+            add(buildFieldDefinition("name", null, null, 0, null))
+            add(buildFieldDefinition("age", null, null, 2, null))
+            add(buildFieldDefinition("dob", null, null, 1, null))
         }
 
         return FileDefinition().apply {

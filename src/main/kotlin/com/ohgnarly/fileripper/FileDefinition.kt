@@ -22,7 +22,7 @@ class FieldDefinition {
     var startPosition: Int? = null
     var fieldLength: Int? = null
     var positionInRow: Int? = null
-    lateinit var xmlFieldName: String
+    var xmlFieldName: String? = null
 }
 
 class FileOutput {

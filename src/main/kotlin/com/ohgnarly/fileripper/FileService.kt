@@ -74,13 +74,14 @@ class XmlFileService(fileDefinition: FileDefinition) : FileService(fileDefinitio
                 val person = nodes.item(i) as Element
                 val record = LinkedHashMap<String, String>()
                 for (fieldDefinition in fileDefinition.fieldDefinitions) {
-                    val fieldNodes = person.getElementsByTagName(fieldDefinition.fieldName)
+                    val tagName: String = fieldDefinition.xmlFieldName ?: fieldDefinition.fieldName
+                    val fieldNodes = person.getElementsByTagName(tagName)
                     if (fieldNodes.length == 0) {
                         throw FileRipperException(java.lang.String.format("Field %s is does not exist in file",
                                 fieldDefinition.fieldName))
                     }
 
-                    val fieldName = fieldNodes.item(0).nodeName
+                    val fieldName = fieldDefinition.fieldName
                     val fieldValue = fieldNodes.item(0).textContent
                     record[fieldName] = fieldValue
                 }

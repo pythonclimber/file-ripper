@@ -10,6 +10,23 @@ File-Ripper is available on Maven Central.
 
 File-Ripper provides multiple ways for you to parse your files.  Using File-Ripper's FileDefinition and FieldDefinition contracts, you decide how to persist your file configurations:
 
+FieldDefinition fields:
+- fieldName: String - required -  the name of the field in the output map
+- startPosition: Int - required for fixed width files - the start position of the field in its row
+- fieldLength: Int - required for fixed width files - the length of the field
+- xmlFieldName: String - optional, name is used if missing - the xml node containing the data
+- positionInRow: Int - required for delimited files - the position of the field in the delimited row
+
+FileDefinition fields:
+- fileType: String - required - the type of the file.  DELIMITED, FIXED, and XML are currently supported
+- fieldDefinitions: List<FieldDefinition> - required - list of FieldDefinition objects to define data fields
+- hasHeader: boolean - optional - whether the file has a header row to skip or not
+- delimiter: String - required for DELIMITED files - character or string of characters that delimit fields
+- recordElementName: String - required for xml files - name of the xml node that represents a full record
+- fileMask: String - required for finding files - a glob pattern to be used in matching file names for look up
+- inputDirectory: String - required for finding files - the absolute path where the files reside
+- completedDirectory: String - optional - the absolute path to move files to once they are ripped 
+
 ```java
 public class FileDefinitionBuilder {
     public FileDefinition buildDelimitedFileDefinition(String[] args) {
